@@ -1,0 +1,363 @@
+<template>
+  <view class="container">
+    <view wx:if="{{list.length>0}}">
+      <!--矩阵商品列表模块-->
+      <shopGridList :purchasetype.sync="purchasetype" :list.sync="list"></shopGridList>
+      <!--加载更多时动画-->
+      <bottomLoadMore :show.sync="showLoading" message="正在加载"></bottomLoadMore>
+      <!--暂无数据显示-->
+      <placeholder :show.sync="is_empty" message="暂无发现数据"></placeholder>
+
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import api from '@/api/api';
+  import tip from '@/utils/tip'
+  import {
+    SYSTEM_INFO,
+    USER_SPECICAL_INFO
+  } from '@/utils/constant';
+  import Searchs from '@/components/search'
+  import ShopGridList from '@/components/shop_grid_list'
+  import BottomLoadMore from "../components/common/bottomLoadMore"
+  import Placeholder from "../components/common/placeholder"
+  import FilterSlider from '@/components/filterSlider'
+  export default class index extends wepy.page {
+    config = {
+      navigationBarTitleText: '买好货',
+    }
+    components = {
+      search: Searchs,
+      shopGridList: ShopGridList,
+      bottomLoadMore: BottomLoadMore,
+      placeholder: Placeholder
+    }
+    data = {
+      list: [],
+      showLoading: false,
+      purchasetype: 1,
+      is_empty: false,
+      is_filter:false,
+      //当前页面
+      currentPage: 1,
+      //总页数
+      page_total: 0,
+      keyword: "",
+      keywordhisList: [],
+      cateCode: "",
+      show: true,
+      sort: -1,
+      title: "",
+      skuval: ""
+    }
+    async getKeyWordHisList() {
+      let userSpecialInfo = wepy.getStorageSync(USER_SPECICAL_INFO) || {};
+      let openId = userSpecialInfo.openid;
+      const json = await api.searchKeywordList({
+        query: {
+          openId: openId
+        }
+      });
+      if (json.data.code == 0) {
+        this.keywordhisList = json.data.list;
+      }
+      this.$apply();
+    }
+    setTitle(title) {//设置bar 标题
+      wepy.setNavigationBarTitle({
+        title: title
+      })
+    }
+    onLoad(option) {
+      this.list = [];
+      this.skuval = "";
+      this.$invoke('search', 'show', "0");//隐藏
+      this.show = false;
+      this.doInitData(this.cateCode);
+    }
+    computed = {}
+    async doInitData(keyword, currentPage, size) {
+      let that = this;
+      // const json = await api.getGoodsList({
+      //   query: {
+      //     page: currentPage || 1,
+      //     size: size || 10,
+      //     searchKeyWords: this.keyword,
+      //     cateCode: this.cateCode || "",
+      //     sort: this.sort,
+      //     skuval: this.skuval
+      //   }
+      // });
+        const json = {
+            "reason":"",
+            "code":"0",
+            "page_total":5,
+            "pageSize":10,
+            "category":{
+                "code":"004009",
+                "name":"风衣",
+                "logo":"http://sujiefs.com/upload/images/20171006/201710061145211681060.jpg",
+                "id":"2c9257a15df5ff61015dfa90cab60479",
+                "attrs":[
+
+                ]
+            },
+            "list":[
+                {
+                    "marketPrice":319,
+                    "code":"SJ20170911-3",
+                    "saleCount":84,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170923/201709231106263380832_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":138,
+                    "name":"双排扣过膝卡其色风衣女中长款宽松收腰外套大衣 SJ20170911-3",
+                    "stockNum":2998,
+                    "logo":"http://sujiefs.com/upload/images/20170923/201709231106263380832.jpg",
+                    "id":"2c9257a15ea875ce015eacbe626a01ae",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":195,
+                    "code":"SJ20170816-37",
+                    "saleCount":0,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170907/201709071136172526456_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":89,
+                    "name":"韩版气质宽松翻领九分袖中长款薄风衣 SJ20170816-37",
+                    "stockNum":6000,
+                    "logo":"http://sujiefs.com/upload/images/20170907/201709071136172526456.jpg",
+                    "id":"2c9257a15e55d524015e5a6ea75e0064",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":295,
+                    "code":"J17D609",
+                    "saleCount":61,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170919/201709191759591221315_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":118,
+                    "name":"摩登经典纯色麂皮绒短款配腰带外套 J17D609",
+                    "stockNum":1500,
+                    "logo":"http://sujiefs.com/upload/images/20170919/201709191759591221315.jpg",
+                    "id":"2c9257a15e997bee015e99bde6640032",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":258,
+                    "code":"J17D609-09",
+                    "saleCount":51,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20171003/201710031541475816575_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":95,
+                    "name":"薄款收腰修身短款双排扣风衣外套 J17D609-09",
+                    "stockNum":2000,
+                    "logo":"http://sujiefs.com/upload/images/20171003/201710031541475816575.jpg",
+                    "id":"2c9257a15eaf3ade015ee138a82a04d1",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":479,
+                    "code":"J17D526",
+                    "saleCount":10,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170829/201708291045463337111_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":198,
+                    "name":"韩版休闲时尚中长款风衣外套 J17D526",
+                    "stockNum":1490,
+                    "logo":"http://sujiefs.com/upload/images/20170829/201708291045463337111.jpg",
+                    "id":"2c9257a15e27fb1f015e2be4832201a3",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":399,
+                    "code":"J17D529",
+                    "saleCount":177,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170829/201708291054515486977_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":168,
+                    "name":"韩版中长款双排扣风衣 J17D529",
+                    "stockNum":5823,
+                    "logo":"http://sujiefs.com/upload/images/20170829/201708291054515486977.jpg",
+                    "id":"2c9257a15e27fb1f015e2bf16f8c01ad",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":429,
+                    "code":"J17D531",
+                    "saleCount":400,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170829/201708291123305799729_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":178,
+                    "name":"翻领双排扣中长款风衣 J17D531",
+                    "stockNum":1600,
+                    "logo":"http://sujiefs.com/upload/images/20170829/201708291123305799729.jpg",
+                    "id":"2c9257a15e27fb1f015e2c0ac42f01ca",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":459,
+                    "code":"J17D530",
+                    "saleCount":587,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170829/201708291111458536346_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":189,
+                    "name":"撞色线迹翻领插肩袖中长款风衣 J17D530",
+                    "stockNum":913,
+                    "logo":"http://sujiefs.com/upload/images/20170829/201708291111458536346.jpg",
+                    "id":"2c9257a15e27fb1f015e2bfec37c01c0",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":419,
+                    "code":"J17D533",
+                    "saleCount":691,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170829/201708291339135516937_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":178,
+                    "name":"中性宽松落肩绣花百搭长袖风衣 J17D533",
+                    "stockNum":1499,
+                    "logo":"http://sujiefs.com/upload/images/20170829/201708291339135516937.jpg",
+                    "id":"2c9257a15e27fb1f015e2c85c98b01dd",
+                    "sourceFlag":1,
+                    "status":1
+                },
+                {
+                    "marketPrice":299,
+                    "code":"SJ20170816-34",
+                    "saleCount":0,
+                    "businessId":"4028800457b6cf7a0157b7998c39001d",
+                    "businessName":"广州素洁服饰公司",
+                    "thumLogo":"http://sujiefs.com/upload/images/20170906/201709061608060618792_thumbnail.jpg",
+                    "evaluateCount":0,
+                    "price":128,
+                    "name":"港风翻领双排扣过膝风衣 SJ20170816-34",
+                    "stockNum":6000,
+                    "logo":"http://sujiefs.com/upload/images/20170906/201709061608060618792.jpg",
+                    "id":"2c9257a15e55d524015e565d07ed0009",
+                    "sourceFlag":1,
+                    "status":1
+                }
+            ],
+            "totalCount":50,
+            "pageNum":1
+        };
+      if (json.code == 0) {
+        that.list = [...that.list, ...json.list];
+        that.page_total = json.page_total;
+        if (json.page_total == 0) {
+          //暂无数据
+          that.is_empty = true;
+        }
+      } else {
+        tip.error(json.msg);
+      }
+      that.showLoading = false;
+      that.$apply();
+    }
+
+    methods = {
+      onShareAppMessage: function(res) {
+        if (res.from === 'button') {
+          // 来自页面内转发按钮
+          console.log(res.target)
+        }
+        return {
+          title: this.detail.name,
+          path: '/pages/search?cateCode=' + this.cateCode + '&title=' + this.title,
+          success: function(res) {
+            // 转发成功
+          },
+          fail: function(res) {
+            // 转发失败
+          }
+        }
+      }
+    }
+    //加载更多
+    onReachBottom() {
+      let that = this;
+      that.showLoading = true;
+      console.log(that.page_total + "===" + that.currentPage);
+      //判断总页数是否大于翻页数
+      if ((that.page_total) > that.currentPage) {
+        //防止重复加载
+        if (that.preventRepeatReuqest) {
+          return true;
+        }
+        that.preventRepeatReuqest = true;
+        that.currentPage++;
+        that.doInitData("", that.currentPage);
+        that.preventRepeatReuqest = false;
+      } else {
+        that.showLoading = false;
+      }
+    };
+  }
+</script>
+
+<style lang="less">
+  .history {
+    padding: 20px 27px;
+  }
+  .doc {
+    color: #999;
+    font-size: 26rpx;
+  }
+  .lable {
+    margin-top: 20rpx;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-left: -20rpx;
+    .child {
+      background: #dedede;
+      padding: 10rpx 20rpx;
+      border-radius: 300rpx;
+      margin-left: 20rpx;
+      font-size: 26rpx;
+      margin-top: 5rpx;
+      color: #000;
+    }
+  }
+  .btn_box {
+    width: 377rpx;
+    margin: 0 auto;
+    padding-top: 88rpx;
+    .button {
+      color: #999;
+    }
+  }
+  .active {
+    border: 1px solid #f23737;
+    color: #f23737;
+  }
+</style>
